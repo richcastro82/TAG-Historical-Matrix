@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output, State, ClientsideFunction
 # import dash_bootstrap_components as dbc
 from dash.dependencies import State, Input, Output
 from datetime import date
-from controls import COUNTIES, WELL_STATUSES, WELL_TYPES, WELL_COLORS
+from controls import COUNTIES, VIRUSES, WELL_TYPES, WELL_COLORS
 
 
 # SETTING UP THE FOUR INDICATORS AT TOP OF PAGE
@@ -70,8 +70,10 @@ filter_options_client = [
 # Load data
 df = pd.read_csv("data/Book2.csv",low_memory=False,)
 
-
-
+dfs = [
+    {"label": str(VIRUSES[COUNTIES]), "value": str(COUNTIES)}
+    for COUNTIES in VIRUSES
+]
 
 # Create app layout
 app.layout = html.Div(
@@ -120,32 +122,50 @@ app.layout = html.Div(
 
 
 
-        html.Div(
-            [
-                html.Div(
-                    [
-                        html.P(
-                            "Filter by date:",
-                            className="control_label",
-                        ),
-                         dcc.DatePickerRange(
-                            id='my-date-picker-range',
-                            min_date_allowed=date(2020, 4, 1),
-                            max_date_allowed=date(2022, 12, 15),
-                            initial_visible_month=date(2022, 8, 5),
-                            end_date=date(2022, 11, 25)
-                        ),
+        html.Div([
+                html.Div([
+                        # html.P(
+                        #     "Filter by date:",
+                        #     className="control_label",
+                        # ),
+                        #  dcc.DatePickerRange(
+                        #     id='my-date-picker-range',
+                        #     min_date_allowed=date(2020, 4, 1),
+                        #     max_date_allowed=date(2022, 12, 15),
+                        #     initial_visible_month=date(2022, 8, 5),
+                        #     end_date=date(2022, 11, 25)
+                        # ),
 
-
-                        html.P("Filter by Virus:", className="control_label"),
+                        html.P("Select a Virus:", className="control_label"),
 
                         dcc.Dropdown(
                             id="virus_dropdown",
-                            options=filter_options_virus,
-                            multi=True,
-                            value=list(WELL_STATUSES.keys()),
+                            options=VIRUSES,
+                            multi=False,
+                            value=list(VIRUSES.keys()),
                             className="dcc_control",
                         ),
+
+
+                        html.P("Select a State:", className="control_label"),
+
+                        dcc.Dropdown(
+                            id="state_dropdown",
+                            options=COUNTIES,
+                            multi=False,
+                            value=list(COUNTIES.keys()),
+                            className="dcc_control",
+                        ),
+
+                        # html.P("Filter by Virus:", className="control_label"),
+                        #
+                        # dcc.Dropdown(
+                        #     id="virus_dropdown",
+                        #     options=filter_options_virus,
+                        #     multi=True,
+                        #     value=list(VIRUSES.keys()),
+                        #     className="dcc_control",
+                        # ),
 
 
 
@@ -160,7 +180,7 @@ app.layout = html.Div(
                         ),
 
                     ],
-                    className="pretty_container four columns",
+                    className="pretty_container three columns",
                     id="cross-filter-options",
                 ),
 
@@ -211,7 +231,7 @@ app.layout = html.Div(
                     className="eight columns",
                 ),
             ],
-            className="row flex-display",
+            className="",
         ),
 
 
@@ -270,8 +290,8 @@ app.layout = html.Div(
     Output("graph", "figure"),
     Input("virus_dropdown", "value"))
 def update_bar_chart(day):
-    dfe = pd.read_csv('data/Book2.csv')
-    fig = px.bar(dfe, x = 'STATE', y = 'POS', title='RT')
+    dfe = pd.read_csv('data/statert.csv')
+    fig = px.bar(dfe, x = 'STATE', y = 't', title='RT')
     return fig
 
 
