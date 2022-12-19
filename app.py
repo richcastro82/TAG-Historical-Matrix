@@ -13,6 +13,13 @@ from datetime import date
 from controls import COUNTIES, VIRUSES, WELL_TYPES, WELL_COLORS
 
 
+
+px.set_mapbox_access_token("pk.eyJ1Ijoia2luZ2Nhc3RybzgyIiwiYSI6ImNsYnV0ejMwMjBicTgzcnBoNmFlMTA5YmwifQ.epJSJjJwbezsjKpTM8y_tA")
+
+
+
+
+
 # SETTING UP THE FOUR INDICATORS AT TOP OF PAGE
 # rt value
 def rtValue():
@@ -241,14 +248,14 @@ app.layout = html.Div(
 
                 # 2ND GRAPH SECTION
                 html.Div(
-                    [dcc.Graph()],
+                    [dcc.Graph(id="mapgraph")],
                     className="pretty_container seven columns",
                 ),
 
 
                 # 3RD GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="individual_graph")],
+                    [dcc.Graph()],
                     className="pretty_container five columns",
                 ),
 
@@ -294,6 +301,14 @@ def update_bar_chart(day):
     fig = px.bar(dfe, x = 'STATE', y = 't', title='RT')
     return fig
 
+@app.callback(
+    Output("mapgraph", "figure"),
+    Input("virus_dropdown", "value"))
+def update_bar_chart(day):
+    mapdf = pd.read_csv('data/client_list.csv', low_memory=False)
+    fig = px.scatter_mapbox(mapdf, lat="Lat", lon="Long", color="Client Name", size="Facility Type",
+                      size_max=15, zoom=3)
+    return fig
 
 
 
