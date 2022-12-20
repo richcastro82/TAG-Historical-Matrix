@@ -232,7 +232,7 @@ app.layout = html.Div(
 
                         # 1ST GRAPH SECTION
                         html.Div(
-                            [dcc.Graph(id="graph")],
+                            [dcc.Graph(id="candle_graph")],
                             id="countGraphContainer",
                             className="pretty_container",
                         ),
@@ -282,7 +282,7 @@ app.layout = html.Div(
 
                 # 5TH GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="candle_graph")],
+                    [dcc.Graph(id="c_graph")],
                     className="pretty_container five columns",
                 ),
             ],
