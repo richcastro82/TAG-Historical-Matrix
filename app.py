@@ -294,16 +294,15 @@ app.layout = html.Div(
 )
 
 
-
+df=pd.read_csv('data/Book6.csv')
 
 @app.callback(
     Output("candle_graph","figure"),
     Input("virus_dropdown","value"))
 
 def update_candle(day):
-    df=pd.read_csv('data/Book6.csv')
     fig = px.scatter(df, x="rt", y="srt", color="state", marginal_y="violin",
-           marginal_x="box", trendline="ols", template="simple_white")
+           marginal_x="box", trendline="ols")
     return fig
 
 
@@ -312,12 +311,9 @@ def update_candle(day):
     Input("virus_dropdown","value"))
 
 def update_bubbles(day):
-    df=pd.read_csv('data/Book6.csv')
     fig = px.scatter(df, x="srt", y="rt", animation_frame="week",
                size="cr", color="state", )
     return fig
-
-
 
 
 
@@ -327,7 +323,6 @@ def update_bubbles(day):
     Input("virus_dropdown","value"))
 
 def update_stack(day):
-    df=pd.read_csv('data/Book6.csv')
     fig=px.area(df, x="week",y="cases",color="state",line_group="state")
     return fig
 
