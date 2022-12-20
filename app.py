@@ -1,3 +1,6 @@
+# RICHARD CASTRO
+# TAG HISTORICAL MATRIX DASHBOARD
+# DEC 2022
 import pandas as pd
 import dash
 import copy
@@ -178,13 +181,13 @@ app.layout = html.Div(
 
                         html.P("Filter by Client:", className="control_label"),
 
-                        dcc.Dropdown(
-                            id="client_dropdown",
-                            options=filter_options_client,
-                            multi=True,
-                            value=list(WELL_TYPES.keys()),
-                            className="dcc_control",
-                        ),
+                        # dcc.Dropdown(
+                        #     id="client_dropdown",
+                        #     options=filter_options_client,
+                        #     multi=True,
+                        #     value=list(WELL_TYPES.keys()),
+                        #     className="dcc_control",
+                        # ),
 
                     ],
                     className="pretty_container three columns",
@@ -255,7 +258,7 @@ app.layout = html.Div(
 
                 # 3RD GRAPH SECTION
                 html.Div(
-                    [dcc.Graph()],
+                    [dcc.Graph(id="stack_graph")],
                     className="pretty_container five columns",
                 ),
 
@@ -272,14 +275,14 @@ app.layout = html.Div(
 
                 # 4TH GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="pie_graph")],
+                    [dcc.Graph(id="bubble_graph")],
                     className="pretty_container seven columns",
                 ),
 
 
                 # 5TH GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="aggregate_graph")],
+                    [dcc.Graph(id="candle_graph")],
                     className="pretty_container five columns",
                 ),
             ],
@@ -294,12 +297,50 @@ app.layout = html.Div(
 
 
 @app.callback(
+    Output("candle_graph","figure"),
+    Input("virus_dropdown","value"))
+
+def update_candle(day):
+    df=pd.read_csv('data/Book6.csv')
+    fig = px.scatter(df, x="rt", y="srt", color="state", marginal_y="violin",
+           marginal_x="box", trendline="ols", template="simple_white")
+    return fig
+
+
+@app.callback(
+    Output("bubble_graph","figure"),
+    Input("virus_dropdown","value"))
+
+def update_bubbles(day):
+    df=pd.read_csv('data/Book6.csv')
+    fig = px.scatter(df, x="srt", y="rt", animation_frame="week",
+               size="cr", color="state", )
+    return fig
+
+
+
+
+
+
+@app.callback(
+    Output("stack_graph","figure"),
+    Input("virus_dropdown","value"))
+
+def update_stack(day):
+    df=pd.read_csv('data/Book6.csv')
+    fig=px.area(df, x="week",y="cases",color="state",line_group="state")
+    return fig
+
+
+@app.callback(
     Output("graph", "figure"),
     Input("virus_dropdown", "value"))
 def update_bar_chart(day):
     dfe = pd.read_csv('data/statert.csv')
     fig = px.bar(dfe, x = 'STATE', y = 't', title='RT')
     return fig
+
+
 
 @app.callback(
     Output("mapgraph", "figure"),
@@ -309,6 +350,11 @@ def update_bar_chart(day):
     fig = px.scatter_mapbox(mapdf, lat="Lat", lon="Long", color="Client Name", size="Facility Type",
                       size_max=15, zoom=3)
     return fig
+
+
+
+
+
 
 
 
