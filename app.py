@@ -14,7 +14,7 @@ from dash.dependencies import Input, Output, State, ClientsideFunction
 from dash.dependencies import State, Input, Output
 from datetime import date
 from controls import COUNTIES, VIRUSES, WELL_TYPES, WELL_COLORS
-
+import numpy as np
 
 
 px.set_mapbox_access_token("pk.eyJ1Ijoia2luZ2Nhc3RybzgyIiwiYSI6ImNsYnV0ejMwMjBicTgzcnBoNmFlMTA5YmwifQ.epJSJjJwbezsjKpTM8y_tA")
@@ -232,7 +232,7 @@ app.layout = html.Div(
 
                         # 1ST GRAPH SECTION
                         html.Div(
-                            [dcc.Graph(id="candle_graph")],
+                            [dcc.Graph(id="cdc_graph")],
                             id="countGraphContainer",
                             className="pretty_container",
                         ),
@@ -251,7 +251,7 @@ app.layout = html.Div(
 
                 # 2ND GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="mapgraph")],
+                    [dcc.Graph(id="bubble_graph")],
                     className="pretty_container seven columns",
                 ),
 
@@ -275,14 +275,14 @@ app.layout = html.Div(
 
                 # 4TH GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="bubble_graph")],
+                    [dcc.Graph(id="")],
                     className="pretty_container seven columns",
                 ),
 
 
                 # 5TH GRAPH SECTION
                 html.Div(
-                    [dcc.Graph(id="c_graph")],
+                    [dcc.Graph(id="map_graph")],
                     className="pretty_container five columns",
                 ),
             ],
@@ -301,8 +301,7 @@ df=pd.read_csv('data/Book6.csv')
     Input("virus_dropdown","value"))
 
 def update_candle(day):
-    fig = px.scatter(df, x="rt", y="srt", color="state", marginal_y="violin",
-           marginal_x="box", trendline="ols")
+    fig = px.line(df, x="rt", y="cases", color="state")
     return fig
 
 
@@ -347,7 +346,68 @@ def update_bar_chart(day):
     return fig
 
 
+@app.callback(
+    Output("map_graph", "figure"),
+    Input("virus_dropdown", "value"))
+def display_choropleth(candidate):
+    df=pd.read_csv('data/lev.csv')
+    fig = go.Figure(data=go.Choropleth(
+    locations=df['STATENAME'], # Spatial coordinates
+    z = df['ACTIVITY LEVEL'], # Data to be color-coded
+    locationmode = 'USA-states', # set of locations match entries in `locations`
+    colorscale = 'Reds',
+    animation_frame=df['WEEK'],
+    # colorbar_title = "Millions USD",
+    ))
 
+    fig.update_layout(
+        # title_text = '2011 US Agriculture Exports by State',
+        geo_scope='usa', # limite map scope to USA
+    )
+
+    return fig
+
+
+
+
+@app.callback(
+    Output("cdc_graph", "figure"),
+    Input("virus_dropdown", "value"))
+
+def update_cdc_map(day):
+    df=pd.read_csv('data/stmap.csv')
+
+
+    data = [dict(type='choropleth',
+                 locations = df['STATENAME'].astype(str),
+                 z=df['ACTIVITY LEVEL'].astype(float),
+                 locationmode='USA-states')]
+
+    # let's create some more additional, data
+    for i in range(39):
+        data.append(data[0].copy())
+        data[-1]['z'] = data[0]['z'] * np.random.rand(*data[0]['z'].shape)
+
+    # let's now create slider for map
+    steps = []
+    for i in range(len(data)):
+        step = dict(method='restyle',
+                    args=['visible', [False] * len(data)],
+                    label='Week {}'.format(i))
+        step['args'][1][i] = True
+        steps.append(step)
+
+    slider = [dict(active=0,
+                    pad={"t": 1},
+                    steps=steps)]
+    layout = dict(geo=dict(scope='usa',
+                           projection={'type': 'albers usa'}),title="CDC MAP STYLE FROM LILY'S EMAIL YESTERDAY",
+                  sliders=slider)
+
+    fig = dict(data=data,
+               layout=layout)
+    # plotly.offline.iplot(fig)
+    return fig
 
 
 
